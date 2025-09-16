@@ -1,0 +1,2 @@
+Path,Accuracy,F1 Score,Precision,Recall
+1AS.csv,93.55 ± 2.63,94.20 ± 2.48,91.41 ± 5.44,97.43 ± 1.79
