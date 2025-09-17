@@ -18,7 +18,7 @@ The ultimate goal of this project is to create a **web application for Parkinson
 Clone the repository and install the required dependencies:
 
 ```bash
-git clone https://github.com/username/project-name.git
+git clone https://github.com/AbdelhamidKHELLADI/parkinson-detection
 cd parkinson-detection
 make install
 ```
