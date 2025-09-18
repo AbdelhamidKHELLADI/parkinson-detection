@@ -2,7 +2,7 @@
 
 ## 📖 Description
 This project is an implementation of my final year project **"Early Detection of Parkinson's Disease using Deep Learning Approaches"**.  
-We used patients' audio recordings with different preprocessing techniques and several models.  
+We used patients' audio recordings from the [Italian parkinson’s voice and speech dataset](https://ieee-dataport.org/open-access/italian-parkinsons-voice-and-speech) with different preprocessing techniques and several models.  
 
 In this repository, I included one representative model for each data type:
 - **VGG16 + CBAM** → for 2D spectrogram data  
