@@ -51,3 +51,17 @@ make train _svm
 ```
 Trains the SVM model on the extracted tabular features.
 
+
+## 🛠 Project Structure
+
+```bash
+parkinson-detection/
+├── etc/ # Config files or additional resources
+├── models/ # Saved and trained models
+├── predict/ # Prediction scripts 
+├── preprocessing/ # Data preprocessing scripts
+├── results/ # Experiment results, logs, and outputs
+├── train/ # Training scripts for different models
+└── utils/ # Utility/helper functions
+
+```
