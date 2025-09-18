@@ -150,12 +150,13 @@ def process_folder(folder, save_dir=os.getenv("ACOUSTIC_FEATURES_DIR_PATH"),test
         save_path =os.getenv("TMP_FEATURES_PATH")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     df.to_csv(save_path, index=False)
-    
-    
+
+# ------------------- Spectrogram Parameters -------------------
 n_fft = int(os.getenv("N_FFT", "2048"))
 hop_length = int(os.getenv("HOP_LENGTH", "512"))
 fmax = int(os.getenv("FMAX", "8000"))
-#--------------------
+
+# ------------------- Spectrogram Creation -------------------
 def create_spectrogam(waveform, sample_rate=os.getenv("TARGET_SAMPLE_RATE","16000"), n_mels=os.getenv("N_MELS","128")):
     sr = sample_rate
     mel_spec = librosa.feature.melspectrogram(y=waveform, sr=sr, n_fft=n_fft, 
@@ -164,7 +165,8 @@ def create_spectrogam(waveform, sample_rate=os.getenv("TARGET_SAMPLE_RATE","1600
     
     mel_spec_tensor = torch.tensor(mel_spec_db).unsqueeze(0) 
     return mel_spec_tensor
-
+    
+# ------------------- Spectrogram Augmentation -------------------
 def augment_spectrogram(waveform,time_mask_param=6, freq_mask_param=6):
     """Apply time masking & frequency masking on an audio waveform."""
 
@@ -189,7 +191,7 @@ def augment_spectrogram(waveform,time_mask_param=6, freq_mask_param=6):
         "freq_masked": freq_masked,
         "combined": combined_masked
     }
-
+# ------------------- Spectrogram saving -------------------
 def save_spectrogram(spectrogram, file_path, sr, cmap='magma'):
     """Save spectrogram as an ultra-high-quality image."""
     plt.figure(figsize=(10, 10), dpi=600)  # Ultra-high resolution
