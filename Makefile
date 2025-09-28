@@ -16,3 +16,6 @@ create_2d:
 
 train_svm:
 	python -m train.svm.train
+
+predict_svm:
+	python -m predict.svm.predict "$(AUDIO)"

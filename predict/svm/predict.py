@@ -11,7 +11,7 @@ load_dotenv()
 def run_prediction(input_audio_path):
     # Segment audio & extract features
     segment_input(input_audio_path)
-    process_folder(os.getenv("TMP_PATH"))  # creates tmp/test.csv
+    process_folder(os.getenv("TMP_PATH"),test=True)  
 
     # Load model
     clf = load_svm_model(os.getenv("MODEL_PATH"))
@@ -20,15 +20,16 @@ def run_prediction(input_audio_path):
     # Predict
     predictions = predict_with_svm(clf, features)
     result = "healthy" if np.median(predictions) == 0 else "parkinson"
-    return result, predictions
+
+    return result
 
 
 @click.command()
 @click.argument("audio", type=click.Path(exists=True))
 def main(audio):
     """Run Parkinson/Healthy prediction on an input AUDIO file."""
-    result, predictions = run_prediction(audio)
-    click.echo(f"The model predicts the audio as: {result}")
+    result = run_prediction(audio)
+    click.echo(result) 
 
 
 if __name__ == "__main__":

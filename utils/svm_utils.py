@@ -39,7 +39,6 @@ def load_svm_model(path):
     if not os.path.exists(path):
         raise FileNotFoundError(f"❌ Model file not found at {path}")
     clf = joblib.load(path)
-    print(f"✅ Loaded SVM model from {path}")
     return clf
 
 def predict_with_svm(clf, X):

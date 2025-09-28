@@ -1,14 +1,8 @@
-click==8.2.1
-joblib==1.5.2
 librosa==0.11.0
-matplotlib==3.10.6
-numba==0.61.2
-pandas==2.3.2
 praat-parselmouth==0.4.6
 python-dotenv==1.1.1
 scikit_learn==1.7.2
 torch==2.5.1
 torchaudio==2.5.1
 torchvision==0.20.1
-tqdm==4.67.1
 streamlit==1.50.0

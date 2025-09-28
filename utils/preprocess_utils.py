@@ -112,12 +112,14 @@ def extract_features(path, filename):
 
 def scale(df):
     scaler = MinMaxScaler()
-    df.loc[:, df.columns[1:-1]] = scaler.fit_transform(df.loc[:, df.columns[1:-1]])
+    numeric_cols = df.columns[1:-1] 
+    df[numeric_cols] = df[numeric_cols].astype(float)
+    df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
 
 
 # ------------------- Batch Process Folder -------------------
-def process_folder(folder, save_dir=os.getenv("ACOUSTIC_FEATURES_DIR_PATH"),test=False):
-    print(f"Processing: {folder}")
+def process_folder(folder, save_dir=os.getenv("ACOUSTIC_FEATURES_DIR_PATH"), test=False):
+
 
     columns = [
         "path", "localabsoluteJitter", "localJitter", "rapJitter", "ddpJitter",
@@ -125,18 +127,34 @@ def process_folder(folder, save_dir=os.getenv("ACOUSTIC_FEATURES_DIR_PATH"),test
         "hnr", "pitch", "FundamentalFrequency"
     ] + [f"MFCC{i}" for i in range(13)] + ["audio_id"]
 
-    df = pd.DataFrame(columns=columns)
+    rows = []  # collect feature dicts here
 
-    for subfolder in os.listdir(folder):
-        subfolder_path = os.path.join(folder, subfolder)
-        for filename in os.listdir(subfolder_path):
-            if filename.endswith(".wav"):
-                path = os.path.join(subfolder_path, filename)
-                features = extract_features(path, filename)
-                if features:
-                    df.loc[len(df)] = [features.get(col, np.nan) for col in columns]
+    for entry in os.listdir(folder):
+        entry_path = os.path.join(folder, entry)
 
-    # Handle NaNs (group-wise fill then column median)
+        if os.path.isdir(entry_path):
+            # Training-style: process subfolder
+            for filename in os.listdir(entry_path):
+                if filename.endswith(".wav"):
+                    path = os.path.join(entry_path, filename)
+                    features = extract_features(path, filename)
+                    if features:
+                        rows.append({col: features.get(col, np.nan) for col in columns})
+
+        elif test and entry.endswith(".wav"):
+            # Test-style: wavs directly in folder
+            features = extract_features(entry_path, entry)
+            if features:
+                rows.append({col: features.get(col, np.nan) for col in columns})
+
+    if not rows:
+        print(f"⚠️ No features extracted from {folder}")
+        return
+
+    # Build DataFrame once
+    df = pd.DataFrame(rows, columns=columns)
+
+    # Handle NaNs
     for col in df.columns[df.isna().any()].tolist():
         df[col] = df.groupby("audio_id")[col].transform(lambda x: x.fillna(x.median()))
         if df[col].isna().any():
@@ -144,14 +162,13 @@ def process_folder(folder, save_dir=os.getenv("ACOUSTIC_FEATURES_DIR_PATH"),test
 
     # Normalize
     scale(df)
+
     # Save
-    save_path = os.path.join(save_dir, f"{os.path.basename(folder)}.csv")
-    if test:
-        save_path =os.getenv("TMP_FEATURES_PATH")
+    save_path = os.getenv("TMP_FEATURES_PATH") if test else os.path.join(save_dir, f"{os.path.basename(folder)}.csv")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     df.to_csv(save_path, index=False)
-
-# ------------------- Spectrogram Parameters -------------------
+    
+    
 n_fft = int(os.getenv("N_FFT", "2048"))
 hop_length = int(os.getenv("HOP_LENGTH", "512"))
 fmax = int(os.getenv("FMAX", "8000"))
