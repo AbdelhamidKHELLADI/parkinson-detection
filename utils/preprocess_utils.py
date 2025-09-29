@@ -3,9 +3,6 @@ import statistics
 import numpy as np
 import pandas as pd
 import librosa
-import torch
-import torchaudio.transforms as T
-import matplotlib.pyplot as plt
 import parselmouth
 from parselmouth.praat import call
 from sklearn.preprocessing import MinMaxScaler
@@ -168,60 +165,7 @@ def process_folder(folder, save_dir=os.getenv("ACOUSTIC_FEATURES_DIR_PATH"), tes
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     df.to_csv(save_path, index=False)
     
-    
-n_fft = int(os.getenv("N_FFT", "2048"))
-hop_length = int(os.getenv("HOP_LENGTH", "512"))
-fmax = int(os.getenv("FMAX", "8000"))
-
-# ------------------- Spectrogram Creation -------------------
-def create_spectrogam(waveform, sample_rate=os.getenv("TARGET_SAMPLE_RATE","16000"), n_mels=os.getenv("N_MELS","128")):
-    sr = sample_rate
-    mel_spec = librosa.feature.melspectrogram(y=waveform, sr=sr, n_fft=n_fft, 
-                                              hop_length=hop_length, n_mels=n_mels, fmax=fmax)
-    mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
-    
-    mel_spec_tensor = torch.tensor(mel_spec_db).unsqueeze(0) 
-    return mel_spec_tensor
-    
-# ------------------- Spectrogram Augmentation -------------------
-def augment_spectrogram(waveform,time_mask_param=6, freq_mask_param=6):
-    """Apply time masking & frequency masking on an audio waveform."""
-
-    
-    mel_spec_tensor = create_spectrogam(waveform)
-
-    time_mask = T.TimeMasking(time_mask_param)
-    freq_mask = T.FrequencyMasking(freq_mask_param)
-
-    time_masked = time_mask(mel_spec_tensor)
-    freq_masked = freq_mask(mel_spec_tensor)
-
-    min_db = -80
-    time_masked[time_masked == 0] = min_db
-    freq_masked[freq_masked == 0] = min_db
-    combined_masked = torch.minimum(time_masked, freq_masked)
-    combined_masked[combined_masked == 0] = min_db
-
-    return {
-        "original": mel_spec_tensor,
-        "time_masked": time_masked,
-        "freq_masked": freq_masked,
-        "combined": combined_masked
-    }
-# ------------------- Spectrogram saving -------------------
-def save_spectrogram(spectrogram, file_path, sr, cmap='magma'):
-    """Save spectrogram as an ultra-high-quality image."""
-    plt.figure(figsize=(10, 10), dpi=600)  # Ultra-high resolution
-    mel_spec_db_numpy = spectrogram.squeeze().detach().cpu().numpy()
-
-    librosa.display.specshow(mel_spec_db_numpy, sr=sr, hop_length=hop_length,
-                             x_axis=None, y_axis=None, cmap=cmap, fmax=fmax)
-
-    plt.axis('off')
-    plt.savefig(file_path, bbox_inches='tight', pad_inches=0, dpi=600)
-    plt.close()
-
-
+   
 
 # ==============================
 # Person ID Extractor
