@@ -106,3 +106,5 @@ parkinson-detection/
 └── utils/                # Utility/helper functions
 
 ```
+## 📄 License
+This project is licensed under the [MIT License](./LICENSE).
